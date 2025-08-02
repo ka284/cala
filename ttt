@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result-container {
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 25px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .present {
+            color: #4caf50;
+        }
+
+        .absent {
+            color: #f44336;
+        }
+
+        .percentage {
+            color: #2196f3;
+        }
+
+        .attendance-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .attendance-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        .error-message {
+            color: #f44336;
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Attendance Calculator</h1>
+            <p>Calculate attendance percentage and statistics</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="totalDays">Total School Days</label>
+                <input type="number" id="totalDays" placeholder="Enter total school days" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="absentDays">Absent Days</label>
+                <input type="number" id="absentDays" placeholder="Enter number of absent days" min="0">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateAttendance()">Calculate Attendance</button>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <div class="result-container" id="resultContainer">
+                <div class="result-item">
+                    <span class="result-label">Total Days:</span>
+                    <span class="result-value" id="totalDaysResult">0</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Absent Days:</span>
+                    <span class="result-value absent" id="absentDaysResult">0</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Present Days:</span>
+                    <span class="result-value present" id="presentDaysResult">0</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Attendance Percentage:</span>
+                    <span class="result-value percentage" id="attendancePercentage">0%</span>
+                </div>
+                
+                <div class="attendance-bar">
+                    <div class="attendance-progress" id="attendanceProgress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAttendance() {
+            // Get input values
+            const totalDaysInput = document.getElementById('totalDays');
+            const absentDaysInput = document.getElementById('absentDays');
+            
+            const totalDays = parseInt(totalDaysInput.value);
+            const absentDays = parseInt(absentDaysInput.value);
+            
+            // Reset error message
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.classList.remove('show');
+            
+            // Validate inputs
+            if (isNaN(totalDays) || totalDays <= 0) {
+                showError('Please enter a valid number for total school days');
+                return;
+            }
+            
+            if (isNaN(absentDays) || absentDays < 0) {
+                showError('Please enter a valid number for absent days');
+                return;
+            }
+            
+            if (absentDays > totalDays) {
+                showError('Absent days cannot be greater than total days');
+                return;
+            }
+            
+            // Calculate attendance
+            const presentDays = totalDays - absentDays;
+            const attendancePercentage = (presentDays / totalDays) * 100;
+            
+            // Display results
+            document.getElementById('totalDaysResult').textContent = totalDays;
+            document.getElementById('absentDaysResult').textContent = absentDays;
+            document.getElementById('presentDaysResult').textContent = presentDays;
+            document.getElementById('attendancePercentage').textContent = attendancePercentage.toFixed(2) + '%';
+            
+            // Show result container
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.classList.add('show');
+            
+            // Animate progress bar
+            const progress = document.getElementById('attendanceProgress');
+            setTimeout(() => {
+                progress.style.width = attendancePercentage + '%';
+            }, 100);
+        }
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            
+            // Hide result container if visible
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.classList.remove('show');
+        }
+        
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculateAttendance();
+            }
+        });
+    </script>
+</body>
+</html>
